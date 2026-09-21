@@ -124,7 +124,7 @@ if __name__ == "__main__":
             
             if results:
                 if len(results) == 1:
-                    print("Palavra encontrada:", results)
+                    print("Palavra encontrada:", palavra)
                 else:
                     print("Palavras encontradas:", results)
             else:
