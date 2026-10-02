@@ -1,0 +1,7 @@
+Redes de computadores permitem a comunicação e o compartilhamento de recursos entre dispositivos. A internet é a maior rede do mundo e conecta bilhões de computadores, servidores e dispositivos móveis.
+
+O modelo TCP/IP organiza a comunicação em camadas: aplicação, transporte, rede e enlace. Na camada de transporte, o protocolo TCP oferece entrega confiável e ordenada dos dados, enquanto o protocolo UDP oferece transmissão mais rápida, porém sem garantia de entrega.
+
+Os roteadores utilizam algoritmos de roteamento para encontrar caminhos entre redes. O algoritmo de Dijkstra, por exemplo, calcula o menor caminho em um grafo e é a base do protocolo OSPF. Já o protocolo BGP é responsável pelo roteamento entre grandes redes da internet.
+
+A segurança de redes envolve firewalls, criptografia, autenticação e monitoramento de tráfego. Funções hash criptográficas são utilizadas para verificar a integridade dos dados transmitidos, garantindo que uma mensagem não foi alterada durante o envio.

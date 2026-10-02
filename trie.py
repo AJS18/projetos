@@ -49,18 +49,6 @@ class Trie:
 
         return current_node.is_end_of_word
 
-    def has_prefix(self, prefix):
-        """Retorna True se existe alguma palavra com o prefixo. Complexidade: O(m)."""
-        current_node = self.root
-
-        for character in prefix:
-            if character not in current_node.children:
-                return False
-
-            current_node = current_node.children[character]
-
-        return True
-
     def starts_with(self, prefix):
         """Retorna todas as palavras que começam com o prefixo.
         Complexidade: O(m) para chegar ao nó do prefixo + O(k) para
@@ -86,45 +74,13 @@ class Trie:
         _dfs(current_node, list(prefix))
         return words
 
-    def list_words(self):
-        """Lista todas as palavras armazenadas (prefixo vazio)."""
-        return self.starts_with("")
-
-    def delete(self, word):
-        """Remove uma palavra da Trie (funcionalidade extra)."""
-        if self.search(word):
-            self._delete(self.root, word, 0)
-            self.word_count -= 1
-
-    def _delete(self, current_node, word, index):
-        # Chegou ao fim da palavra: desmarca e indica se o nó pode ser apagado
-        if index == len(word):
-            if not current_node.is_end_of_word:
-                return False
-
-            current_node.is_end_of_word = False
-            return len(current_node.children) == 0
-
-        character = word[index]
-        node = current_node.children.get(character)
-
-        if node is None:
-            return False
-
-        delete_current_node = self._delete(node, word, index + 1)
-        if delete_current_node:
-            del current_node.children[character]
-            return len(current_node.children) == 0 and not current_node.is_end_of_word
-
-        return False
-
     def __len__(self):
         return self.word_count
 
 
 # Palavras iniciais (exemplo do enunciado). Na Parte II serão
 # substituídas pelo vocabulário extraído dos arquivos .txt.
-palavras_iniciais = [
+PALAVRAS_INICIAIS = [
     "computador", "computação", "computacional", "compilador",
     "complexidade", "programação", "processador", "processamento",
 ]
@@ -137,7 +93,7 @@ def ler_palavra(mensagem):
 
 def menu():
     trie = Trie()
-    for palavra in palavras_iniciais:
+    for palavra in PALAVRAS_INICIAIS:
         trie.insert(palavra)
 
     while True:
@@ -157,9 +113,9 @@ def menu():
             if not palavra:
                 print("Entrada vazia.")
             elif trie.search(palavra):
-                print(f"A palavra '{palavra}' foi encontrada.")
+                print(f"A palavra '{palavra}' EXISTE na Trie.")
             else:
-                print(f"A palavra '{palavra}' não existe na Trie.")
+                print(f"A palavra '{palavra}' NÃO existe na Trie.")
 
         elif option == "2":
             prefixo = ler_palavra("Digite o prefixo: ")
@@ -169,15 +125,14 @@ def menu():
 
             results = sorted(trie.starts_with(prefixo))
             if results:
-                if len(results) == 1:
-                    print("Palavra encontrada:", results)
-                else:
-                    print("Palavras encontradas:", results)
+                print("Palavras encontradas:")
+                for palavra in results:
+                    print(palavra)
             else:
                 print("Nenhuma palavra encontrada.")
 
         elif option == "3":
-            palavra = ler_palavra("Adicione uma palavra: ")
+            palavra = ler_palavra("Digite a nova palavra: ")
             if not palavra:
                 print("Entrada vazia.")
             elif trie.search(palavra):

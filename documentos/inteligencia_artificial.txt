@@ -1,0 +1,7 @@
+A inteligência artificial é a área da computação que estuda sistemas capazes de realizar tarefas que normalmente exigiriam inteligência humana, como reconhecer imagens, compreender linguagem e tomar decisões.
+
+O aprendizado de máquina é uma subárea da inteligência artificial em que os algoritmos aprendem padrões a partir de dados. Modelos supervisionados aprendem com exemplos rotulados, enquanto modelos não supervisionados descobrem estruturas ocultas nos dados, como agrupamentos.
+
+O processamento de linguagem natural trata da análise de textos. Antes de treinar um modelo, os textos passam por um pré-processamento que inclui conversão para minúsculas, remoção de pontuação, tokenização, remoção de stopwords e, em alguns casos, stemming ou lematização.
+
+Redes neurais profundas impulsionaram avanços recentes na inteligência artificial. Modelos de linguagem treinados com grandes volumes de textos conseguem gerar respostas, traduzir idiomas e resumir documentos, mas exigem grande capacidade de processamento e memória.

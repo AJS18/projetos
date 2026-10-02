@@ -1,0 +1,7 @@
+Algoritmos são sequências finitas de passos bem definidos que resolvem um problema computacional. O estudo de algoritmos busca entender não apenas se uma solução está correta, mas também quão eficiente ela é em relação ao tempo de execução e ao uso de memória.
+
+A análise de complexidade utiliza a notação assintótica, como O grande, Ômega e Theta, para descrever o crescimento do custo de um algoritmo conforme o tamanho da entrada aumenta. Um algoritmo de busca sequencial, por exemplo, tem complexidade O(n), enquanto a busca binária em um vetor ordenado tem complexidade O(log n).
+
+Algoritmos de ordenação são exemplos clássicos estudados em computação. O Bubble Sort e o Insertion Sort possuem complexidade quadrática no pior caso, enquanto o Merge Sort e o Heap Sort garantem complexidade O(n log n). O Quick Sort, apesar de ter pior caso quadrático, costuma ser muito rápido na prática.
+
+Algoritmos de processamento de textos também são importantes. A busca de padrões em textos pode ser feita pelo algoritmo ingênuo, pelo algoritmo KMP, que evita comparações repetidas usando uma tabela de prefixos, ou pelo algoritmo de Boyer-Moore. Estruturas como a Trie permitem buscar palavras e prefixos de forma eficiente.

@@ -1,0 +1,7 @@
+Um banco de dados é uma coleção organizada de dados armazenados eletronicamente. O sistema gerenciador de banco de dados controla o acesso, garante a integridade e permite consultas eficientes sobre grandes volumes de informação.
+
+Os bancos de dados relacionais organizam os dados em tabelas compostas por linhas e colunas. A linguagem SQL é utilizada para criar tabelas, inserir registros, atualizar informações e realizar consultas com filtros, junções e agrupamentos.
+
+Para acelerar as consultas, os bancos de dados utilizam índices. Um índice baseado em árvore B permite buscas por intervalo, enquanto um índice baseado em hash oferece busca média em tempo constante para consultas por igualdade. A escolha do índice adequado depende do tipo de consulta mais frequente.
+
+Os bancos de dados não relacionais, também chamados de NoSQL, armazenam dados em documentos, grafos, colunas ou pares chave e valor. Mecanismos de busca textual utilizam índices invertidos para localizar rapidamente os documentos que contêm determinadas palavras, uma técnica fundamental na recuperação de informação.

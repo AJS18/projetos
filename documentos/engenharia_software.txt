@@ -1,0 +1,7 @@
+A engenharia de software aplica princípios de engenharia ao desenvolvimento de programas, buscando produzir sistemas confiáveis, eficientes e fáceis de manter. Ela abrange o levantamento de requisitos, o projeto, a implementação, os testes e a manutenção.
+
+Os requisitos funcionais descrevem o que o sistema deve fazer, enquanto os requisitos não funcionais descrevem qualidades como desempenho, segurança e usabilidade. A análise de desempenho frequentemente envolve medir o tempo de execução e relacioná-lo à complexidade dos algoritmos utilizados.
+
+Boas práticas de programação incluem organizar o código em funções e classes, escrever comentários relevantes, utilizar nomes claros e evitar duplicação. A modularização facilita a reutilização de componentes, como uma estrutura de dados implementada em um módulo e importada em outro.
+
+Os testes de software verificam se o programa se comporta como esperado. Testes unitários avaliam funções isoladas, testes de integração verificam a comunicação entre módulos e testes de sistema avaliam a aplicação completa do ponto de vista do usuário.
