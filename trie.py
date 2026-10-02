@@ -169,9 +169,10 @@ def menu():
 
             results = sorted(trie.starts_with(prefixo))
             if results:
-                print("Palavras encontradas:")
-                for palavra in results:
-                    print(palavra)
+                if len(results) == 1:
+                    print("Palavra encontrada:", results)
+                else:
+                    print("Palavras encontradas:", results)
             else:
                 print("Nenhuma palavra encontrada.")
 
