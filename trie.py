@@ -1,29 +1,18 @@
-"""
-Parte I - Implementação de Trie e Sistema de Autocomplete.
-
-Equivalência com as operações pedidas no enunciado:
-    inserir(palavra)        -> Trie.insert(word)
-    buscar(palavra)         -> Trie.search(word)
-    buscar_prefixo(prefixo) -> Trie.starts_with(prefix)
-"""
-
+#trie e auto complete
 
 class Node:
-    """Nó da Trie: cada nó guarda seus filhos (caractere -> Node)
-    e uma marcação indicando se uma palavra termina nele."""
-
     def __init__(self):
-        self.children = dict()
-        self.is_end_of_word = False
-
+        self.children = dict() #um dict dos caracteres das palavras. custo O(1) para acessar um nó
+        self.is_end_of_word = False #indica se o nó é o final de uma palavra
 
 class Trie:
     def __init__(self):
         self.root = Node()
-        self.word_count = 0  # quantidade de palavras distintas armazenadas
+        self.word_count = 0  #qtd de palavras distintas armazenadas
 
+    #insere uma palavra na trie
+    #complexidade: O(m), m = tamanho da palavra.
     def insert(self, word):
-        """Insere uma palavra na Trie. Complexidade: O(m), m = tamanho da palavra."""
         current_node = self.root
 
         for character in word:
@@ -32,13 +21,14 @@ class Trie:
 
             current_node = current_node.children[character]
 
-        # Só conta se a palavra ainda não existia (evita contar duplicatas)
+        #só conta se a palavra ainda não existia (evita contar palavras repetidas)
         if not current_node.is_end_of_word:
             current_node.is_end_of_word = True
             self.word_count += 1
 
+    #retorna true se a palavra existe na trie, false caso contrário
+    #complexidade: O(m)
     def search(self, word):
-        """Busca exata: retorna True se a palavra existe. Complexidade: O(m)."""
         current_node = self.root
 
         for character in word:
@@ -49,21 +39,23 @@ class Trie:
 
         return current_node.is_end_of_word
 
+    #retorna todas as palavras que começam com o prefixo
+    #complexidade: O(m) para chegar ao nó do prefixo + O(k) para
+    #percorrer os k caracteres descendentes e montar as palavras. 0(m+k)
     def starts_with(self, prefix):
-        """Retorna todas as palavras que começam com o prefixo.
-        Complexidade: O(m) para chegar ao nó do prefixo + O(k) para
-        percorrer os k nós descendentes e montar as palavras."""
         words = []
         current_node = self.root
 
-        # 1) Desce na Trie até o último caractere do prefixo
+        #percorre na trie até o último caractere do prefixo
         for character in prefix:
             if character not in current_node.children:
                 return words
 
             current_node = current_node.children[character]
 
-        # 2) DFS a partir desse nó coletando as palavras completas
+        #algoritmo que percorre toda a trie
+        #se o caractere atual for o final de uma palavra
+        #adiciona a palavra na lista
         def _dfs(node, path):
             if node.is_end_of_word:
                 words.append(''.join(path))
@@ -74,20 +66,19 @@ class Trie:
         _dfs(current_node, list(prefix))
         return words
 
+    #função que retorna a qtd de palavras distintas armazenadas na trie
     def __len__(self):
         return self.word_count
 
 
-# Palavras iniciais (exemplo do enunciado). Na Parte II serão
-# substituídas pelo vocabulário extraído dos arquivos .txt.
+#palavras previamente cadastradas na trie
 PALAVRAS_INICIAIS = [
     "computador", "computação", "computacional", "compilador",
     "complexidade", "programação", "processador", "processamento",
 ]
 
-
+#ler palavra digitada, removendo os espaços e convertendo para minúsculas
 def ler_palavra(mensagem):
-    """Lê uma entrada do usuário normalizada (minúsculas, sem espaços)."""
     return input(mensagem).strip().lower()
 
 
@@ -110,36 +101,35 @@ def menu():
 
         if option == "1":
             palavra = ler_palavra("Digite a palavra: ")
-            if not palavra:
-                print("Entrada vazia.")
-            elif trie.search(palavra):
-                print(f"A palavra '{palavra}' EXISTE na Trie.")
+            if palavra and trie.search(palavra):
+                print(f"A palavra '{palavra}' existe na Trie.")
+            elif palavra:
+                print(f"A palavra '{palavra}' não existe na Trie.")
             else:
-                print(f"A palavra '{palavra}' NÃO existe na Trie.")
+                print("Entrada vazia.")
 
         elif option == "2":
             prefixo = ler_palavra("Digite o prefixo: ")
-            if not prefixo:
-                print("Entrada vazia.")
-                continue
-
-            results = sorted(trie.starts_with(prefixo))
-            if results:
-                print("Palavras encontradas:")
-                for palavra in results:
-                    print(palavra)
+            if prefixo:
+                results = sorted(trie.starts_with(prefixo))
+                if results:
+                    print("Palavras encontradas:")
+                    for palavra in results:
+                        print(palavra)
+                else:
+                    print("Nenhuma palavra encontrada.")
             else:
-                print("Nenhuma palavra encontrada.")
+                print("Entrada vazia.")
 
         elif option == "3":
             palavra = ler_palavra("Digite a nova palavra: ")
-            if not palavra:
-                print("Entrada vazia.")
-            elif trie.search(palavra):
+            if palavra and trie.search(palavra):
                 print(f"'{palavra}' já está cadastrada.")
-            else:
+            elif palavra:
                 trie.insert(palavra)
                 print(f"'{palavra}' adicionada!")
+            else:
+                print("Entrada vazia.")
 
         elif option == "4":
             print("Encerrando...")

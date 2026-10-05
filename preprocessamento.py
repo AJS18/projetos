@@ -1,94 +1,64 @@
-"""
-Parte II - Etapa 1: leitura dos documentos e pré-processamento textual.
+#preprocessamento dos textos
 
-Etapas aplicadas a cada texto:
-    1. Conversão para minúsculas
-    2. Remoção de pontuação (e de números)
-    3. Tokenização em palavras
-    4. Remoção de stopwords
+import re #função que encontra tudo que não seja letra
+from pathlib import Path #função que permite manipular caminhos de arquivos e pastas
 
-Decisão de implementação: os acentos são MANTIDOS ("computação" continua
-"computação"), para ficar consistente com as palavras da Parte I.
-"""
+#constante que pega pontuações, números ou espaço
+#[^\w\s] pega pontuação e espaço
+#\d pega números
+PADRAO_NAO_LETRA = re.compile(r"[^\w\s]|\d")
 
-import re
-from pathlib import Path
-
-# Tudo que NÃO for letra (inclusive acentuadas) ou espaço vira espaço.
-# [^\w\s] pega pontuação; \d pega dígitos; _ é tratado à parte porque \w o inclui.
-PADRAO_NAO_LETRA = re.compile(r"[^\w\s]|\d|_")
-
-
+#lê o arquivo de stopwords, uma por linha e devolve um set
+#complexidade:O(1) médio usando hash
 def carregar_stopwords(caminho="stopwords.txt"):
-    """Lê o arquivo de stopwords (uma por linha) e devolve um set.
-    Usar set deixa a verificação 'palavra in stopwords' O(1) em média (hash)."""
     with open(caminho, encoding="utf-8") as arquivo:
         return {linha.strip().lower() for linha in arquivo if linha.strip()}
 
-
+#converte as palavras para minúsculas
 def converter_minusculas(texto):
     return texto.lower()
 
-
+#remove pontuação e números do texto, substituindo por espaço
 def remover_pontuacao(texto):
     return PADRAO_NAO_LETRA.sub(" ", texto)
 
-
+#tokeniza o texto em palavras, separando elas
 def tokenizar(texto):
-    # split() sem argumento separa por qualquer espaço em branco e ignora vazios
     return texto.split()
 
-
+#remove qualquer palavra que esta no arquivo de stopwords
+#e cria um novo set de tokens sem as stopwords
+#complexidade: O(1) médio
 def remover_stopwords(tokens, stopwords):
-    return [token for token in tokens if token not in stopwords]
+    resultado = []
+    for token in tokens:
+        if token not in stopwords:
+            resultado.append(token)
+    return resultado    
 
-
+#função que aplica todas as etapas de preprocessamento em um texto
+#complexidade: O(n), n = tamanho do texto
 def preprocessar(texto, stopwords):
-    """Aplica as 4 etapas em sequência. Complexidade: O(n), n = tamanho do texto."""
     texto = converter_minusculas(texto)
     texto = remover_pontuacao(texto)
     tokens = tokenizar(texto)
     return remover_stopwords(tokens, stopwords)
 
-
+#lê todos os arquivos .txt
 def ler_arquivo(caminho):
-    """Lê um .txt em UTF-8; se falhar (arquivo salvo no Bloco de Notas
-    antigo, por exemplo), tenta latin-1."""
     try:
         return caminho.read_text(encoding="utf-8")
     except UnicodeDecodeError:
         return caminho.read_text(encoding="latin-1")
 
-
+#pré processa todos os .txt, coloca em ordem alfabética
+#e guarda em um dict {nome_arquivo: palavras}
 def processar_pasta(pasta, stopwords):
-    """Processa automaticamente TODOS os .txt da pasta (nenhum nome fixo no código).
-    Retorna um dict: nome_do_arquivo -> lista de tokens."""
     pasta = Path(pasta)
-    if not pasta.is_dir():
-        raise FileNotFoundError(f"Pasta '{pasta}' não encontrada.")
+    if pasta.is_dir():
+        documentos = {}
+        for caminho in sorted(pasta.glob("*.txt")):
+            documentos[caminho.name] = preprocessar(ler_arquivo(caminho), stopwords)
+        return documentos
 
-    documentos = {}
-    for caminho in sorted(pasta.glob("*.txt")):
-        documentos[caminho.name] = preprocessar(ler_arquivo(caminho), stopwords)
-    return documentos
-
-
-# Teste isolado desta etapa: python preprocessamento.py
-if __name__ == "__main__":
-    # Caminhos relativos à pasta deste arquivo, para rodar de qualquer lugar
-    base = Path(__file__).parent
-    stopwords = carregar_stopwords(base / "stopwords.txt")
-
-    exemplo = "Os Algoritmos de Busca são muito importantes."
-    print("Entrada:", exemplo)
-    print("Saída:  ", " | ".join(preprocessar(exemplo, stopwords)))
-
-    documentos = processar_pasta(base / "documentos", stopwords)
-    print(f"\nDocumentos processados: {len(documentos)}")
-    for nome, tokens in documentos.items():
-        print(f"- {nome}: {len(tokens)} tokens -> {tokens[:8]} ...")
-
-    total = sum(len(t) for t in documentos.values())
-    distintos = {token for tokens in documentos.values() for token in tokens}
-    print(f"\nTotal de palavras após tokenização: {total}")
-    print(f"Termos distintos: {len(distintos)}")
+    raise FileNotFoundError(f"Pasta '{pasta}' não encontrada.")

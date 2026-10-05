@@ -1,139 +1,123 @@
-"""
-Parte II - Mini mecanismo de busca em arquivos de texto.
+#mini meacnismo de busca em arquivos de texto
 
-Já implementado:  pré-processamento, vocabulário na Trie, índice invertido,
-                  busca por palavra exata, busca por prefixo, listagem de
-                  documentos e estatísticas (menu do item 3.8).
-"""
-
-import time
+import time #serve para medir o tempo das execuções
 from pathlib import Path
 
-from trie import Trie  # Reaproveitamento OBRIGATÓRIO da Trie da Parte I
+from trie import Trie  #reaproveitamento da trie
 from preprocessamento import (carregar_stopwords, preprocessar, processar_pasta,
                               converter_minusculas, remover_pontuacao, tokenizar)
 from indice_invertido import construir_indice, buscar_palavra
 
+#constantes que permitem que o main encontre os arquivos .txt
 BASE = Path(__file__).parent
 PASTA_DOCUMENTOS = BASE / "documentos"
 ARQUIVO_STOPWORDS = BASE / "stopwords.txt"
 
-
-# ---------------------------------------------------------------------------
-# 3.4 - Construção do vocabulário e inserção na Trie
-# ---------------------------------------------------------------------------
+#constrói o vocabulário
+#junta as palavras distintas de todos os documentos em um set
+#complexidade: O(T), T = total de tokens em todos os documentos
 def construir_vocabulario(documentos):
-    """Conjunto de palavras DISTINTAS de todos os documentos.
-    O set descarta repetições em O(1) médio por token -> O(T) no total."""
     vocabulario = set()
     for tokens in documentos.values():
         vocabulario.update(tokens)
     return vocabulario
 
-
+#constrói a trie a partir do vocabulário
+#insere cada termo do vocabulário na trie
+#complexidade: O(V * m), V = vocabulário(palavras distintas), m = tamanho médio do termo
 def construir_trie(vocabulario):
-    """Insere cada termo do vocabulário na Trie.
-    Complexidade: O(V * m), V = termos distintos, m = tamanho médio do termo."""
     trie = Trie()
     for palavra in vocabulario:
         trie.insert(palavra)
     return trie
 
-
-# ---------------------------------------------------------------------------
-# Classe que agrupa todas as estruturas do mecanismo de busca
-# ---------------------------------------------------------------------------
+#classe que junta todas as estruturas do mecanismo de busca
 class MecanismoBusca:
+    
+    #carrega as stopwords, processa os documentos e conta o total de palavras
     def __init__(self, pasta, arquivo_stopwords):
         self.stopwords = carregar_stopwords(arquivo_stopwords)
         self.documentos = processar_pasta(pasta, self.stopwords)
         self.total_palavras = sum(len(t) for t in self.documentos.values())
 
-        # Vocabulário + Trie (com medição de tempo)
+        #vocabulário e trie com medição de tempo
         self.vocabulario = construir_vocabulario(self.documentos)
         inicio = time.perf_counter()
         self.trie = construir_trie(self.vocabulario)
         self.tempo_trie = time.perf_counter() - inicio
 
-        # Índice invertido (com medição de tempo)
+        #índice invertido com medição de tempo
         inicio = time.perf_counter()
         self.indice = construir_indice(self.documentos)
         self.tempo_indice = time.perf_counter() - inicio
 
-        # Histórico das consultas: (tipo, termo, nº de resultados, tempo em s)
+        #histórico das consultas
         self.historico = []
-
+    
+    #registra cada consulta no histórico e mostra o tempo de execução
     def registrar(self, tipo, termo, resultados, duracao):
         self.historico.append((tipo, termo, resultados, duracao))
         print(f"Tempo da consulta: {duracao * 1000:.4f} ms")
 
-    # -----------------------------------------------------------------------
-    # 3.7.1 - Consulta por palavra exata (índice invertido / hash)
-    # -----------------------------------------------------------------------
-    def buscar_palavra(self):
+    #consulta por palavra exata
+    def consultar_palavra(self):
         entrada = input("Digite a palavra: ")
-
-        # A consulta passa pelo MESMO pré-processamento dos documentos,
-        # senão "Algoritmos" ou "busca," nunca seriam encontrados.
         termos = preprocessar(entrada, self.stopwords)
-        if not termos:
-            print("Entrada vazia ou composta só por stopwords (essas palavras não são indexadas).")
-            return
-        if len(termos) > 1:
-            print(f"Digite apenas uma palavra. Buscando somente '{termos[0]}'.")
-        palavra = termos[0]
 
-        inicio = time.perf_counter()
-        arquivos = buscar_palavra(self.indice, palavra)
-        duracao = time.perf_counter() - inicio
+        if termos:
+            if len(termos) > 1:
+                print(f"Digite apenas uma palavra. Buscando somente '{termos[0]}'.")
+            palavra = termos[0]
 
-        if arquivos:
-            print(f"Encontrada em {len(arquivos)} arquivo(s):")
-            for nome in arquivos:
-                print(f"- {nome}")
+            #medição de tempo da consulta da palavra
+            inicio = time.perf_counter()
+            arquivos = buscar_palavra(self.indice, palavra)
+            duracao = time.perf_counter() - inicio
+
+            if arquivos:
+                print(f"Encontrada em {len(arquivos)} arquivo(s):")
+                for nome in arquivos:
+                    print(f"- {nome}")
+            else:
+                print(f"A palavra '{palavra}' não foi encontrada em nenhum documento.")
+            self.registrar("Palavra", palavra, len(arquivos), duracao)
         else:
-            print(f"A palavra '{palavra}' não foi encontrada em nenhum documento.")
-        self.registrar("Palavra", palavra, len(arquivos), duracao)
+            print("Entrada vazia ou composta só por stopwords (essas palavras não são indexadas).")
 
-    # -----------------------------------------------------------------------
-    # 3.7.2 - Consulta por prefixo: Trie -> termos; índice -> documentos
-    # -----------------------------------------------------------------------
+    #consulta por prefixo sem remover as stopwords
     def buscar_prefixo(self):
         entrada = input("Digite o prefixo: ")
-
-        # Aqui NÃO removemos stopwords: um prefixo como "de" é válido
-        # (encontra "dados", "definidos"...). Só normalizamos o texto.
         termos = tokenizar(remover_pontuacao(converter_minusculas(entrada)))
-        if not termos:
-            print("Entrada vazia.")
-            return
-        prefixo = termos[0]
 
-        inicio = time.perf_counter()
-        palavras = sorted(self.trie.starts_with(prefixo))                          # Trie
-        resultados = [(p, buscar_palavra(self.indice, p)) for p in palavras]       # Hash
-        duracao = time.perf_counter() - inicio
+        if termos:
+            prefixo = termos[0]
+            
+            #medindo o tempo da consulta do prefixo
+            inicio = time.perf_counter()
+            palavras = sorted(self.trie.starts_with(prefixo))                          # Trie
+            resultados = [(p, buscar_palavra(self.indice, p)) for p in palavras]       # Hash
+            duracao = time.perf_counter() - inicio
 
-        if resultados:
-            print(f"Palavras encontradas ({len(resultados)}):")
-            for palavra, arquivos in resultados:
-                print(f"{palavra} -> {', '.join(arquivos)}")
+            #mostra as palavras encontradas e os arquivos onde elas aparecem
+            if resultados:
+                print(f"Palavras encontradas ({len(resultados)}):")
+                for palavra, arquivos in resultados:
+                    print(f"{palavra} -> {', '.join(arquivos)}")
+            else:
+                print(f"Nenhuma palavra começa com '{prefixo}'.")
+            self.registrar("Prefixo", prefixo, len(resultados), duracao)
         else:
-            print(f"Nenhuma palavra começa com '{prefixo}'.")
-        self.registrar("Prefixo", prefixo, len(resultados), duracao)
+            print("Entrada vazia.")
 
-    # -----------------------------------------------------------------------
-    # Listar documentos
-    # -----------------------------------------------------------------------
+    #lista todos os documentos processados
+    #mostrando o total de palavras e o total de palavras distintas
     def listar_documentos(self):
-        print(f"\n{len(self.documentos)} documento(s) em '{PASTA_DOCUMENTOS.name}/':")
+        print(f"\n{len(self.documentos)} documento(s) em '{PASTA_DOCUMENTOS.name}':")
         print(f"{'Arquivo':<32}{'Palavras':>10}{'Distintas':>11}")
         for nome, tokens in self.documentos.items():
             print(f"{nome:<32}{len(tokens):>10}{len(set(tokens)):>11}")
 
-    # -----------------------------------------------------------------------
-    # 3.9 - Estatísticas obrigatórias
-    # -----------------------------------------------------------------------
+    #mostra as estatísticas do mecanismo de busca e do histórico de consultas
     def exibir_estatisticas(self):
         print("\n------------- ESTATÍSTICAS -------------")
         print(f"Documentos processados:         {len(self.documentos)}")
@@ -144,22 +128,23 @@ class MecanismoBusca:
         print(f"Tempo de construção do índice:  {self.tempo_indice * 1000:.4f} ms")
 
         print("\nConsultas realizadas:")
-        if not self.historico:
+        if self.historico:
+            print(f"{'#':<4}{'Tipo':<10}{'Termo':<20}{'Resultados':>11}{'Tempo (ms)':>13}")
+            
+            #percorre o histórico enumerando as consultas
+            for i, (tipo, termo, qtd, duracao) in enumerate(self.historico, start=1):
+                print(f"{i:<4}{tipo:<10}{termo:<20}{qtd:>11}{duracao * 1000:>13.4f}")
+        else:
             print("(nenhuma consulta ainda)")
-            return
-        print(f"{'#':<4}{'Tipo':<10}{'Termo':<20}{'Resultados':>11}{'Tempo (ms)':>13}")
-        for i, (tipo, termo, qtd, duracao) in enumerate(self.historico, start=1):
-            print(f"{i:<4}{tipo:<10}{termo:<20}{qtd:>11}{duracao * 1000:>13.4f}")
 
 
-# ---------------------------------------------------------------------------
-# 3.8 - Menu
-# ---------------------------------------------------------------------------
+#menu mecanismo de busca
 def main():
     motor = MecanismoBusca(PASTA_DOCUMENTOS, ARQUIVO_STOPWORDS)
 
+    #constrói um disct de opções
     opcoes = {
-        "1": motor.buscar_palavra,
+        "1": motor.consultar_palavra,
         "2": motor.buscar_prefixo,
         "3": motor.listar_documentos,
         "4": motor.exibir_estatisticas,
@@ -184,7 +169,7 @@ def main():
             print("Encerrando...")
             break
         elif opcao in opcoes:
-            opcoes[opcao]()  # o próprio dict de opções também é uma tabela hash
+            opcoes[opcao]()  #o próprio dict de opções também é uma tabela hash
         else:
             print("Opção inválida.")
 
